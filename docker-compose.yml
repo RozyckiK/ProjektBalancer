@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   publisher: #--------------------PUBLISHER -  pobiera dane o rowerach miejskich z API operatorów --------------------#
+    depends_on:
+      - kafka
     build: ./publisher
     container_name: publisher
     restart: on-failure
@@ -30,3 +32,15 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_ENABLE_KRAFT=false
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-storage:/prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus-storage:
