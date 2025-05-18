@@ -2,13 +2,13 @@ import requests
 import time
 import json
 from kafka import KafkaProducer
-#fom prometheus_client import start_http_server, Counter
+from prometheus_client import start_http_server, Counter
 
 # Prometheus Counter do śledzenia liczby wysłanych wiadomości
-#sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do Kafka')
+sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do Kafka')
 
 # Start Prometheus HTTP server na porcie 8000
-#start_http_server(8000)
+start_http_server(8000)
 
 CITY_FEEDS = {
     "Seattle": "https://mds.bird.co/gbfs/v2/public/seattle-washington/free_bike_status.json",
@@ -50,12 +50,12 @@ def main():
                         print(f"➡️  Wysłano do Kafka: {message}")
                         
                          # ➕ inkrementuj licznik Prometheusa
-                        #sent_messages.inc()
+                        sent_messages.inc()
 
                 except Exception as e:
                     print(f"❌ Błąd dla {city}: {e}")
 
-            time.sleep(10)
+            time.sleep(0.5)
 
 if __name__ == "__main__":
     main()
