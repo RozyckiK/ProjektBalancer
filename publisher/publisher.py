@@ -5,7 +5,7 @@ from kafka import KafkaProducer
 from prometheus_client import start_http_server, Counter
 
 # Start Prometheus HTTP server na porcie 8000
-start_http_server(8000)
+start_http_server(8000, addr="0.0.0.0")
 
 # Prometheus Counter do śledzenia liczby wysłanych wiadomości
 sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do Kafka')
