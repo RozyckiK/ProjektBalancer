@@ -13,6 +13,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    ports:
+      - "8000:8000"
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
@@ -40,6 +42,9 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-storage:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--log.level=debug'
     restart: unless-stopped
 
 volumes:

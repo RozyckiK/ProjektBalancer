@@ -4,11 +4,11 @@ import json
 from kafka import KafkaProducer
 from prometheus_client import start_http_server, Counter
 
-# Prometheus Counter do śledzenia liczby wysłanych wiadomości
-sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do Kafka')
-
 # Start Prometheus HTTP server na porcie 8000
 start_http_server(8000)
+
+# Prometheus Counter do śledzenia liczby wysłanych wiadomości
+sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do Kafka')
 
 CITY_FEEDS = {
     "Seattle": "https://mds.bird.co/gbfs/v2/public/seattle-washington/free_bike_status.json",
@@ -49,13 +49,13 @@ def main():
                         producer.send("rowery", message)
                         print(f"➡️  Wysłano do Kafka: {message}")
                         
-                         # ➕ inkrementuj licznik Prometheusa
-                        sent_messages.inc()
+                    # ➕ inkrementuj licznik Prometheusa
+                    sent_messages.inc()
 
                 except Exception as e:
                     print(f"❌ Błąd dla {city}: {e}")
 
-            time.sleep(0.5)
+            time.sleep(2)
 
 if __name__ == "__main__":
     main()
