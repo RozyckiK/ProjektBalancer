@@ -6,7 +6,7 @@ metadata:
   labels:
     app: publisher
 spec:
-  replicas: 4
+  replicas: 1
   selector:
     matchLabels:
       app: publisher
@@ -30,11 +30,9 @@ metadata:
   name: publisher
   namespace: projekt-balancer
 spec:
-  type: NodePort
   selector:
     app: publisher
   ports:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-      nodePort: 30090  # <– Wystawi usługę na porcie hosta
