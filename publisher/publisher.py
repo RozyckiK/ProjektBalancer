@@ -39,7 +39,7 @@ def main():
                     bikes = fetch_bike_data(url)
                     print(f"📍 {city} → {len(bikes)} rowerów")
 
-                    for bike in bikes[:5]:  # wysyłamy tylko pierwsze 5 dla testów
+                    for bike in bikes:
                         message = {
                             "city": city,
                             "bike_id": bike.get("bike_id"),
@@ -47,7 +47,7 @@ def main():
                             "lon": bike.get("lon")
                         }
                         producer.send("rowery", message)
-                        print(f"➡️  Wysłano do Kafka: {message}")
+                        #print(f"➡️  Wysłano do Kafka: {message}")
                         
                     # ➕ inkrementuj licznik Prometheusa
                     sent_messages.inc()
