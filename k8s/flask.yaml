@@ -31,7 +31,11 @@ spec:
     app: flask-app
   type: NodePort
   ports:
-    - protocol: TCP
+    - name: http
       port: 5000
       targetPort: 5000
-      nodePort: 30500  # dostępne pod http://localhost:30500
+      nodePort: 30500
+    - name: metrics
+      port: 8001
+      targetPort: 8001
+      nodePort: 30501
