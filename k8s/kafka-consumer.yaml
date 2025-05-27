@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: projekt-balancer
+  labels:
+    app: kafka-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      containers:
+      - name: kafka-consumer
+        image: rozyckik/kafka-consumer:latest
+        ports:
+        - name: metrics
+          containerPort: 8000
+        env:
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+        - name: KAFKA_TOPIC
+          value: "test-topic"
+        - name: KAFKA_GROUP
+          value: "project-balancer-consumer"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-consumer
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: kafka-consumer
+  ports:
+  - name: metrics
+    port: 8000
+    targetPort: 8000
