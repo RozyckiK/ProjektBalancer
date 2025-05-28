@@ -45,9 +45,9 @@ data:
       - job_name: 'node-exporter'
         static_configs:
           - targets: ['node-exporter:9100']
-      - job_name: 'flask'
+      - job_name: 'kafka-consumer'
         static_configs:
-          - targets: ['flask-service:8001']
+          - targets: ['kafka-consumer:8000']
 ---
 apiVersion: v1
 kind: Service
