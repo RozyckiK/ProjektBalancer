@@ -12,7 +12,12 @@ sent_messages = Counter('sent_messages_total', 'Liczba wysłanych wiadomości do
 
 CITY_FEEDS = {
     "Seattle": "https://mds.bird.co/gbfs/v2/public/seattle-washington/free_bike_status.json",
-    "Tempe": "https://mds.bird.co/gbfs/tempe/free_bike_status.json"
+    "Tempe": "https://mds.bird.co/gbfs/tempe/free_bike_status.json",
+    "Chicago": "https://data.lime.bike/api/partners/v1/gbfs/chicago/free_bike_status",
+    "Arlingtonco": "https://mds.bird.co/gbfs/arlingtonco/free_bike_status.json",
+    "Nashville": "https://mds.bird.co/gbfs/nashville/free_bike_status.json",
+    "Miami": "https://mds.bird.co/gbfs/miami/free_bike_status.json",
+    "Edmonton": "https://data.lime.bike/api/partners/v1/gbfs/edmonton/free_bike_status.json"
 }
 
 producer = KafkaProducer(
