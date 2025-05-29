@@ -17,7 +17,7 @@ def run_http_server():
 Thread(target=run_http_server, daemon=True).start()
 
 consumer = KafkaConsumer(
-    'rowery',
+    'test-topic',
     bootstrap_servers=['kafka:9092'],
     group_id='my-group',
     auto_offset_reset='earliest',

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+      - name: generator
+        image: rozyckik/load-generator:latest
+        args:
+          - "--pattern=ramp"
+          - "--min-rps=100"
+          - "--max-rps=10000"
+          - "--duration=300"      # cały test 300s (10 min)
+          - "--step-time=15"      # co 15s ramp-up
+          - "--bootstrap=kafka:9092"
+          - "--topic=test-topic"
+          - "--metrics-port=8000"
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-generator-metrics
+  namespace: projekt-balancer
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: metrics
+  selector:
+    app: load-generator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-gen-config
+  namespace: projekt-balancer
+data:
+  PATTERN:      "ramp"
+  MIN_RPS:      "100"
+  MAX_RPS:      "10000"
+  DURATION:     "600"
+  STEP_TIME:    "30"
+  BOOTSTRAP:    "kafka:9092"
+  TOPIC:        "test-topic"
+  METRICS_PORT: "8000"
