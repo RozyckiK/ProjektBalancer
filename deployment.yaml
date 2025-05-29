@@ -1,0 +1,430 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: projekt-balancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:latest
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
+            - name: GF_AUTH_DISABLE_INITIAL_ADMIN_CHANGE_PASSWORD
+              value: "true"
+            - name: GF_PATHS_PROVISIONING
+              value: /etc/grafana/provisioning
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: grafana-datasources
+              mountPath: /etc/grafana/provisioning/datasources
+      volumes:
+        - name: grafana-datasources
+          configMap:
+            name: grafana-datasources
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: projekt-balancer
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: projekt-balancer
+spec:
+  type: NodePort
+  selector:
+    app: grafana
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 32000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: projekt-balancer
+  labels:
+    app: kafka-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      containers:
+      - name: kafka-consumer
+        image: rozyckik/kafka-consumer:latest
+        ports:
+        - name: metrics
+          containerPort: 8000
+        env:
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+        - name: KAFKA_TOPIC
+          value: "test-topic"
+        - name: KAFKA_GROUP
+          value: "project-balancer-consumer"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-consumer
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: kafka-consumer
+  ports:
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: bitnami/kafka:3.4.0
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_BROKER_ID
+              value: "1"
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka:9092"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+            - name: KAFKA_ENABLE_KRAFT
+              value: "false"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: kafka
+  ports:
+    - port: 9092
+      targetPort: 9092
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+      - name: generator
+        image: rozyckik/load-generator:latest
+        args:
+          - "--pattern=ramp"
+          - "--min-rps=100"
+          - "--max-rps=100000"
+          - "--duration=900"      # cały test 900s (15 min)
+          - "--step-time=30"      # co 30s ramp-up
+          - "--bootstrap=kafka:9092"
+          - "--topic=test-topic"
+          - "--metrics-port=8000"
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-generator-metrics
+  namespace: projekt-balancer
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: metrics
+  selector:
+    app: load-generator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-gen-config
+  namespace: projekt-balancer
+data:
+  PATTERN:      "ramp"
+  MIN_RPS:      "100"
+  MAX_RPS:      "10000"
+  DURATION:     "600"
+  STEP_TIME:    "30"
+  BOOTSTRAP:    "kafka:9092"
+  TOPIC:        "test-topic"
+  METRICS_PORT: "8000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-exporter
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:latest
+          ports:
+            - containerPort: 9100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: node-exporter
+  ports:
+    - protocol: TCP
+      port: 9100
+      targetPort: 9100
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest
+          ports:
+            - containerPort: 9090
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: projekt-balancer
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 2s
+      scrape_timeout: 1s
+    scrape_configs:
+      - job_name: 'publisher'
+        static_configs:
+          - targets: ['publisher:8000']
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: ['node-exporter:9100']
+      - job_name: 'kafka-consumer'
+        static_configs:
+          - targets: ['kafka-consumer:8000']
+      - job_name: 'load-generator'
+        static_configs:
+          - targets: ['load-generator-metrics:8000']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: projekt-balancer
+spec:
+  type: NodePort
+  selector:
+    app: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+      nodePort: 32090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publisher
+  namespace: projekt-balancer
+  labels:
+    app: publisher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publisher
+  template:
+    metadata:
+      labels:
+        app: publisher
+    spec:
+      containers:
+      - name: publisher
+        image: rozyckik/publisher:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: publisher
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: publisher
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+#Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  namespace: projekt-balancer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: bitnami/zookeeper:latest
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+          ports:
+            - containerPort: 2181
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+
+---
+#Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: projekt-balancer
+spec:
+  selector:
+    app: zookeeper
+  ports:
+    - port: 2181
+      targetPort: 2181

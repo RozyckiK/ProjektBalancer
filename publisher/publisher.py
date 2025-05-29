@@ -37,7 +37,7 @@ def print_bikes(bikes):
         print(f" - ID: {bike['bike_id']}, Lat: {bike['lat']}, Lon: {bike['lon']}")
 
 def main():
-    print("🚲 Publisher uruchomiony – pobieranie danych rowerów z Seattle...\n")
+    print("🚲 Publisher uruchomiony – pobieranie danych rowerów.\n")
     while True:
             for city, url in CITY_FEEDS.items():
                 try:
