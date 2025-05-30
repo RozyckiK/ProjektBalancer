@@ -203,9 +203,9 @@ spec:
         image: rozyckik/load-generator:latest
         args:
           - "--pattern=ramp"
-          - "--min-rps=100"
-          - "--max-rps=1000"
-          - "--duration=900"      # cały test 600s (10 min)
+          - "--min-rps=1"
+          - "--max-rps=500"
+          - "--duration=600"      # cały test 600s (10 min)
           - "--step-time=30"      # co 30s ramp-up
           - "--bootstrap=kafka:9092"
           - "--topic=test-topic"

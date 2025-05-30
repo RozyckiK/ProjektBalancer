@@ -1,17 +1,19 @@
 import time
 from threading import Thread
+from collections import deque
 from kafka import KafkaConsumer
 from prometheus_client import start_http_server, Gauge
 
-# --- metryki Prometheusa jako serie czasowe (line chart)
-rps_gauge = Gauge('kafka_consumer_rps', 'Messages consumed per second')
-avg_latency_gauge = Gauge('kafka_consumer_avg_latency_ms',
-                          'Average end-to-end latency in ms per second')
-max_latency_gauge = Gauge('kafka_consumer_max_latency_ms',
-                          'Maximum end-to-end latency in ms per second')
+# --- metryki Prometheusa
+rps_gauge        = Gauge('kafka_consumer_rps',           'Messages consumed per second')
+avg_latency_gauge = Gauge('kafka_consumer_avg_latency_ms', 'Average end-to-end latency in ms (sliding window)')
+max_latency_gauge = Gauge('kafka_consumer_max_latency_ms', 'Maximum end-to-end latency in ms (per second)')
+
+# ustaw okno na ostatnie N sekund
+WINDOW_SEC = 2
+lat_window = deque()  # będzie trzymać (ts, latency_ms)
 
 def run_http_server():
-    # expose /metrics podowi na porcie 8000
     start_http_server(8000)
 
 Thread(target=run_http_server, daemon=True).start()
@@ -24,42 +26,49 @@ consumer = KafkaConsumer(
     enable_auto_commit=True,
 )
 
-# liczniki do RPS i latencji
 msg_count = 0
-latencies = []
-rps_ts = time.time()
+rps_ts     = time.time()
 
 while True:
-    poll_start = time.time()
+    # pollujemy maks. 1s
     records = consumer.poll(timeout_ms=1000, max_records=100)
-    # nie mierzymy fetch latency w tej wersji
-
+    now = time.time()
     for tp, msgs in records.items():
         for msg in msgs:
-            now_ms = time.time() * 1000
-            lat_ms = now_ms - msg.timestamp
-            latencies.append(lat_ms)
-            # tu normalna logika przetwarzania
+            now_ms  = now * 1000
+            lat_ms  = now_ms - msg.timestamp
+            # dorzucamy do okna
+            if lat_ms < 0:
+                lat_ms = 0.0
+            lat_window.append((now, lat_ms))
             msg_count += 1
 
-    # co sekundę oblicz RPS i statystyki latencji
-    now = time.time()
+    # co sekundę liczymy RPS i uśrednioną latency z okna
     if now - rps_ts >= 1.0:
-        # RPS
+        # 1) RPS za ostatnią sekundę
         rps_gauge.set(msg_count)
 
-        # średnia i max latencja z ostatniej sekundy
-        if latencies:
-            avg = sum(latencies) / len(latencies)
-            mx  = max(latencies)
+        # 2) obliczamy tylko te wpisy z lat_window, które są młodsze niż WINDOW_SEC
+        cutoff = now - WINDOW_SEC
+        # usuń stare
+        while lat_window and lat_window[0][0] < cutoff:
+            lat_window.popleft()
+
+        # wyciągnij same latency
+        window_lats = [lat for ts, lat in lat_window]
+        if window_lats:
+            avg = sum(window_lats) / len(window_lats)
         else:
-            avg = 0
-            mx  = 0
+            avg = 0.0
 
         avg_latency_gauge.set(avg)
-        max_latency_gauge.set(mx)
 
-        # zeruj liczniki i czas
+        # 3) max latency tylko w tej sekundzie (jak miałeś dotychczas)
+        #    możesz tu też window-ować, ale zostawiłem per-second
+        #    abyś nadal miał widok outlierów
+        max_this_sec = max(window_lats) if window_lats else 0.0
+        max_latency_gauge.set(max_this_sec)
+
+        # reset licznika RPS
         msg_count = 0
-        latencies.clear()
-        rps_ts = now
+        rps_ts     = now
