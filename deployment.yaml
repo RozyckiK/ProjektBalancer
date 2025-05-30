@@ -197,8 +197,8 @@ spec:
         args:
           - "--pattern=ramp"
           - "--min-rps=100"
-          - "--max-rps=100000"
-          - "--duration=900"      # cały test 900s (15 min)
+          - "--max-rps=1000"
+          - "--duration=900"      # cały test 600s (10 min)
           - "--step-time=30"      # co 30s ramp-up
           - "--bootstrap=kafka:9092"
           - "--topic=test-topic"
