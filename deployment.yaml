@@ -35,6 +35,13 @@ spec:
           volumeMounts:
             - name: grafana-datasources
               mountPath: /etc/grafana/provisioning/datasources
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
       volumes:
         - name: grafana-datasources
           configMap:
@@ -261,6 +268,13 @@ spec:
           image: quay.io/prometheus/node-exporter:latest
           ports:
             - containerPort: 9100
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
@@ -300,6 +314,13 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/prometheus
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
       volumes:
         - name: config-volume
           configMap:
@@ -369,6 +390,13 @@ spec:
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
+        resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
