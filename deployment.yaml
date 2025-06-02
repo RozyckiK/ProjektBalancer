@@ -262,6 +262,8 @@ spec:
       labels:
         app: node-exporter
     spec:
+      hostNetwork: true
+      hostPID: true
       containers:
         - name: node-exporter
           image: quay.io/prometheus/node-exporter:latest
