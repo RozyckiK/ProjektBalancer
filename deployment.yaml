@@ -72,7 +72,7 @@ data:
       "links": [],
       "panels": [
         {
-          "datasource": { "type": "prometheus", "uid": "__PROMETHEUS_DS_UID__" },
+          "datasource": { "type": "prometheus", "name": "Prometheus" },
           "fieldConfig": {
             "defaults": {
               "unit": "ms",
@@ -101,7 +101,7 @@ data:
           "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "__PROMETHEUS_DS_UID__" },
+          "datasource": { "type": "prometheus", "name": "Prometheus" },
           "fieldConfig": {
             "defaults": {
               "unit": "%",
@@ -130,7 +130,7 @@ data:
           "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "__PROMETHEUS_DS_UID__" },
+          "datasource": { "type": "prometheus", "name": "Prometheus" },
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
@@ -165,7 +165,7 @@ data:
           "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "__PROMETHEUS_DS_UID__" },
+          "datasource": { "type": "prometheus", "name": "Prometheus" },
           "fieldConfig": {
             "defaults": {
               "unit": "%",
