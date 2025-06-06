@@ -951,7 +951,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kafka-proxy-config
+  name: kafka-proxy-config-least
   namespace: projekt-balancer
 data:
   nginx.conf: |
@@ -987,7 +987,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kafka-proxy-config
+  name: kafka-proxy-config-weight
   namespace: projekt-balancer
 data:
   nginx.conf: |
