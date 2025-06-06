@@ -324,7 +324,7 @@ spec:
           containerPort: 8000
         env:
         - name: KAFKA_BROKERS
-          value: "kafka:9092"
+          value: "kafka-proxy:19092"
         - name: KAFKA_TOPIC
           value: "test-topic"
         - name: KAFKA_GROUP
@@ -569,7 +569,7 @@ spec:
           - "--max-rps=500"
           - "--duration=600"      # cały test 600s (10 min)
           - "--step-time=30"      # co 30s ramp-up
-          - "--bootstrap=kafka:9092"
+          - "--bootstrap=kafka-proxy:19092"
           - "--topic=test-topic"
           - "--metrics-port=8000"
         ports:

@@ -20,7 +20,7 @@ Thread(target=run_http_server, daemon=True).start()
 
 consumer = KafkaConsumer(
     'test-topic',
-    bootstrap_servers=['kafka:9092'],
+    bootstrap_servers=['kafka-proxy:19092'],
     group_id='my-group',
     auto_offset_reset='earliest',
     enable_auto_commit=True,
