@@ -21,7 +21,7 @@ CITY_FEEDS = {
 }
 
 producer = KafkaProducer(
-    bootstrap_servers="kafka:9092",  # nazwa usługi z docker-compose
+    bootstrap_servers="kafka-proxy:19092",  # nazwa usługi z docker-compose
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
