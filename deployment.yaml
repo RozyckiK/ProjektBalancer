@@ -392,6 +392,12 @@ spec:
             value: "yes"
           - name: KAFKA_ENABLE_KRAFT
             value: "false"
+          - name: KAFKA_CFG_LOG_RETENTION_MS
+            value: "60000"       # 60s w ms
+          - name: KAFKA_CFG_LOG_RETENTION_BYTES
+            value: "-1"            # brak limitu po rozmiarze
+          - name: KAFKA_CFG_LOG_SEGMENT_BYTES
+            value: "1073741824"    # 1 GiB
         resources:
           requests:
             memory: "512Mi"
@@ -454,6 +460,12 @@ spec:
             value: "yes"
           - name: KAFKA_ENABLE_KRAFT
             value: "false"
+          - name: KAFKA_CFG_LOG_RETENTION_MS
+            value: "60000"       # 60s w ms
+          - name: KAFKA_CFG_LOG_RETENTION_BYTES
+            value: "-1"            # brak limitu po rozmiarze
+          - name: KAFKA_CFG_LOG_SEGMENT_BYTES
+            value: "1073741824"    # 1 GiB
         resources:
           requests:
             memory: "512Mi"
@@ -516,6 +528,12 @@ spec:
             value: "yes"
           - name: KAFKA_ENABLE_KRAFT
             value: "false"
+          - name: KAFKA_CFG_LOG_RETENTION_MS
+            value: "60000"       # 60s w ms
+          - name: KAFKA_CFG_LOG_RETENTION_BYTES
+            value: "-1"            # brak limitu po rozmiarze
+          - name: KAFKA_CFG_LOG_SEGMENT_BYTES
+            value: "1073741824"    # 1 GiB
         resources:
           requests:
             memory: "512Mi"
