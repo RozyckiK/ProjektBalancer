@@ -1,2 +1,8 @@
 .vagrant/
 join.sh
+terraform.tfvars
+terraform.tfstate
+.terraform.lock.hcl
+packer/secret.pkrvars.hcl
+terraform/.terraform
+terraform/terraform.tfstate.backup

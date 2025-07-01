@@ -1,5 +1,8 @@
 {
     "cSpell.words": [
         "jsonify"
-    ]
+    ],
+
+    "terraform.languageServer.enabled": false
 }
+
