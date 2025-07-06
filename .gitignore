@@ -6,3 +6,4 @@ terraform.tfstate
 packer/secret.pkrvars.hcl
 terraform/.terraform
 terraform/terraform.tfstate.backup
+instrukcja.docx

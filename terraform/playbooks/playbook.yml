@@ -1,0 +1,19 @@
+---
+- name: Testowa konfiguracja nowej VM
+  hosts: all
+  become: yes
+  tasks:
+    - name: Sprawdź połączenie z VM
+      ping:
+    - name: Zainstaluj htop
+      apt:
+        name: htop
+        state: present
+        update_cache: yes
+
+    - name: Pokaż uptime
+      command: uptime
+      register: uptime_out
+
+    - debug:
+        msg: "{{ uptime_out.stdout }}"

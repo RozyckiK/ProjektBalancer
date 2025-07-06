@@ -1,0 +1,49 @@
+---
+- name: Inicjalizacja mastera Kubernetes
+  hosts: masters
+  become: yes
+  tasks:
+    - name: Zainicjuj mastera (kubeadm init)
+      command: kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address }} --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=Swap
+      register: kubeadm_init
+      args:
+        creates: /etc/kubernetes/admin.conf
+
+    - name: Skonfiguruj kubectl dla roota
+      shell: |
+        mkdir -p $HOME/.kube
+        cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        chown $(id -u):$(id -g) $HOME/.kube/config
+      args:
+        creates: /root/.kube/config
+
+    - name: Deploy flannel (sieć podów)
+      shell: |
+        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: flannel_result
+      until: flannel_result.rc == 0
+      retries: 5
+      delay: 10
+
+    - name: Pobierz polecenie join z mastera
+      shell: |
+        kubeadm token create --print-join-command
+      register: join_command
+
+    - name: Zapisz join-command do pliku (na controlerze)
+      delegate_to: localhost
+      become: no
+      copy:
+        content: "{{ join_command.stdout }}"
+        dest: "{{ playbook_dir }}/join_command.txt"
+
+    - name: Skonfiguruj kubectl dla roota
+      become: yes
+      copy:
+       src: /etc/kubernetes/admin.conf
+       dest: /root/.kube/config
+       owner: root
+       group: root
+       mode: '0600'

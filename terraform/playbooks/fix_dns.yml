@@ -1,0 +1,64 @@
+---
+- name: Napraw DNS i wyłącz IPv6 na wszystkich maszynach
+  hosts: all
+  become: yes
+  tasks:
+    - name: Wyłącz systemd-resolved
+      systemd:
+        name: systemd-resolved
+        enabled: no
+        state: stopped
+      ignore_errors: yes
+
+    - name: Usuń /etc/resolv.conf jeśli istnieje
+      file:
+        path: /etc/resolv.conf
+        state: absent
+
+    - name: Ustaw nowe DNS w /etc/resolv.conf
+      copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver 8.8.8.8
+          nameserver 1.1.1.1
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Zablokuj plik /etc/resolv.conf przed nadpisaniem (chattr +i)
+      command: chattr +i /etc/resolv.conf
+      ignore_errors: yes
+
+    - name: (Opcjonalnie) Ustaw DNS w netplan, jeśli plik istnieje
+      block:
+        - name: Znajdź plik netplan
+          find:
+            paths: /etc/netplan
+            patterns: "*.yaml"
+          register: netplan_files
+
+        - name: Dodaj nameservers do netplan (jeśli nie ma)
+          lineinfile:
+            path: "{{ item.path }}"
+            insertafter: '^\\s*dhcp4:.*$'
+            line: "      nameservers:\n        addresses: [8.8.8.8,1.1.1.1]"
+          loop: "{{ netplan_files.files }}"
+          when: netplan_files.matched > 0
+
+        - name: Zastosuj netplan (jeśli pliki były zmieniane)
+          command: netplan apply
+          when: netplan_files.matched > 0
+      rescue:
+        - debug: msg="Brak plików netplan lub błąd, pomijam"
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Wyłącz IPv6 w sysctl na stałe
+      copy:
+        dest: /etc/sysctl.d/99-disable-ipv6.conf
+        content: |
+          net.ipv6.conf.all.disable_ipv6 = 1
+          net.ipv6.conf.default.disable_ipv6 = 1
+          net.ipv6.conf.lo.disable_ipv6 = 1
+
+    - name: Przeładuj sysctl (wyłącza IPv6 od razu)
+      command: sysctl --system

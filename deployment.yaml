@@ -46,7 +46,6 @@ data:
         options:
           path: /var/lib/grafana/dashboards
 
-  # 2) JSON Twojego dashboardu (skrót "Projekt Balancer")
   projekt-balancer-dashboard.json: |
     {
       "annotations": {
@@ -400,11 +399,11 @@ spec:
             value: "1073741824"    # 1 GiB
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: "256Mi"
+            cpu: "400m"
           limits:
-            memory: "1024Mi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "800m"
 ---
 apiVersion: v1
 kind: Service
@@ -468,11 +467,11 @@ spec:
             value: "1073741824"    # 1 GiB
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: "256Mi"
+            cpu: "400m"
           limits:
-            memory: "1024Mi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "800m"
 ---
 apiVersion: v1
 kind: Service
@@ -536,11 +535,11 @@ spec:
             value: "1073741824"    # 1 GiB
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: "256Mi"
+            cpu: "400m"
           limits:
-            memory: "1024Mi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "800m"
 ---
 apiVersion: v1
 kind: Service

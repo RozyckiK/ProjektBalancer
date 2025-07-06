@@ -1,0 +1,46 @@
+---
+- name: Instalacja kubeadm, kubelet, kubectl na wszystkich VM
+  hosts: all
+  become: yes
+  tasks:
+    - name: Zainstaluj zależności
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Dodaj klucz GPG Kubernetes (jako plik binarny)
+      shell: |
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+      args:
+        creates: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+
+    - name: Dodaj repozytorium Kubernetes (Ubuntu 24.04+)
+      copy:
+        dest: /etc/apt/sources.list.d/kubernetes.list
+        content: |
+          deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Zainstaluj kubelet, kubeadm, kubectl (v1.28.1)
+      apt:
+        name:
+          - kubelet=1.28.1-1.1
+          - kubeadm=1.28.1-1.1
+          - kubectl=1.28.1-1.1
+        state: present
+
+    - name: Zablokuj aktualizacje kubelet/kubeadm/kubectl
+      shell: |
+        apt-mark hold kubelet kubeadm kubectl

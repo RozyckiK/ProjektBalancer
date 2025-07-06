@@ -1,0 +1,48 @@
+- name: Przygotuj system pod Kubernetes
+  hosts: all
+  become: yes
+  tasks:
+    - name: Wyłącz swap
+      shell: swapoff -a
+
+    - name: Wyłącz swap (na stałe w fstab)
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*\s+swap\s+)'
+        replace: '#\1'
+
+    - name: Załaduj moduły kernela overlay i br_netfilter
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Zapisz konfigurację modułów dla K8s
+      copy:
+        dest: /etc/modules-load.d/k8s.conf
+        content: |
+          overlay
+          br_netfilter
+
+    - name: Ustaw sysctl dla Kubernetes
+      copy:
+        dest: /etc/sysctl.d/k8s.conf
+        content: |
+          net.bridge.bridge-nf-call-iptables  = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+          net.ipv4.ip_forward                 = 1
+
+    - name: Przeładuj sysctl
+      command: sysctl --system
+
+    - name: Zainstaluj wymagane zależności systemowe
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        update_cache: yes

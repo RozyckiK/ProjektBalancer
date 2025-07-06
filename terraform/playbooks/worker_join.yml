@@ -1,0 +1,34 @@
+---
+- name: Join workerów do klastra
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Wczytaj komendę join z pliku (z controlera)
+      delegate_to: localhost
+      become: no
+      slurp:
+        src: "{{ playbook_dir }}/join_command.txt"
+      register: join_file
+
+    - name: Dołącz do klastra (kubeadm join)
+      shell: "{{ join_file['content'] | b64decode }} --ignore-preflight-errors=Swap"
+      args:
+        creates: /etc/kubernetes/kubelet.conf
+
+- name: Wypisz wszystkie nody w klastrze
+  hosts: masters
+  become: yes
+  tasks:
+    - name: Poczekaj 20 sekund aż workery się dołączą
+      wait_for:
+        timeout: 20
+
+    - name: Wypisz nody w klastrze
+      shell: kubectl get nodes -o wide
+      register: get_nodes
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Wyświetl nody w logu
+      debug:
+        var: get_nodes.stdout_lines

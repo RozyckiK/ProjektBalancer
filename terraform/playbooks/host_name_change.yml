@@ -1,0 +1,7 @@
+- name: Ustaw hostname na nazwę VM
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ustaw hostname
+      hostname:
+        name: "{{ inventory_hostname }}"

@@ -1,0 +1,35 @@
+---
+- name: Instalacja i konfiguracja containerd na wszystkich nodach
+  hosts: all
+  become: yes
+  tasks:
+    - name: Upewnij się, że nie ma starego repo Docker
+      file:
+        path: /etc/apt/sources.list.d/docker.list
+        state: absent
+      ignore_errors: true
+
+    - name: Zainstaluj containerd z repo Ubuntu (noble)
+      apt:
+        name: containerd
+        state: present
+        update_cache: yes
+
+    - name: Skonfiguruj domyślny plik config.toml dla containerd
+      shell: |
+        mkdir -p /etc/containerd
+        containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Ustaw systemd cgroup w config.toml
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+
+    - name: Restartuj i włącz containerd
+      systemd:
+        name: containerd
+        state: restarted
+        enabled: yes

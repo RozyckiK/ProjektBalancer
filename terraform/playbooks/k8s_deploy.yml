@@ -1,0 +1,45 @@
+---
+- name: Deploy manifest z GitHuba na masterze
+  hosts: masters
+  become: yes
+  vars:
+    raw_url: "https://raw.githubusercontent.com/RozyckiK/ProjektBalancer/main/deployment.yaml"
+    local_file: "/tmp/deployment.yaml"
+
+  tasks:
+    - name: Pobierz manifest z GitHuba (raw)
+      get_url:
+        url: "{{ raw_url }}"
+        dest: "{{ local_file }}"
+
+    - name: Deploy manifest do K8s
+      shell: kubectl apply -f "{{ local_file }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: deploy_out
+
+    - name: Wyświetl wynik kubectl apply
+      debug:
+        var: deploy_out.stdout_lines
+
+    - name: Wyświetl stan wszystkich podów
+      shell: kubectl get pods -o wide
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: pods_out
+
+    - name: Podsumowanie podów
+      debug:
+        var: pods_out.stdout_lines
+
+# NOWY PLAY, OSOBNO!
+- name: Wyświetl IP mastera i port Grafany
+  hosts: masters
+  gather_facts: yes
+  tasks:
+    - name: Wyświetl informację o Grafanie
+      debug:
+        msg: |
+          Grafana: http://{{ ansible_default_ipv4.address }}:32000
+          Login: admin
+          Hasło: admin
