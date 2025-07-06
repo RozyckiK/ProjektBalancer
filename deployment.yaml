@@ -818,52 +818,52 @@ roleRef:
 #-----------------------------------------|   Publisher   |-----------------------------------------
 #---------------------------------------------------------------------------------------------------
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: publisher
-  namespace: projekt-balancer
-  labels:
-    app: publisher
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: publisher
-  template:
-    metadata:
-      labels:
-        app: publisher
-    spec:
-      containers:
-      - name: publisher
-        image: rozyckik/publisher:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: PYTHONUNBUFFERED
-          value: "1"
-        resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "250m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: publisher
-  namespace: projekt-balancer
-spec:
-  selector:
-    app: publisher
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
----
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: publisher
+#  namespace: projekt-balancer
+#  labels:
+#    app: publisher
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: publisher
+#  template:
+#    metadata:
+#      labels:
+#        app: publisher
+#    spec:
+#      containers:
+#      - name: publisher
+#        image: rozyckik/publisher:latest
+#        ports:
+#        - containerPort: 8000
+#        env:
+#        - name: PYTHONUNBUFFERED
+#          value: "1"
+#        resources:
+#            requests:
+#              memory: "128Mi"
+#              cpu: "100m"
+#            limits:
+#              memory: "256Mi"
+#              cpu: "250m"
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: publisher
+#  namespace: projekt-balancer
+#spec:
+#  selector:
+#    app: publisher
+#  ports:
+#    - protocol: TCP
+#      port: 8000
+#      targetPort: 8000
+#---
 
 
 
