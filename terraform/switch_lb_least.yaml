@@ -1,0 +1,44 @@
+---
+- name: Restart stack i deploy RR balancera
+  hosts: masters
+  become: yes
+  vars:
+    raw_url: "https://raw.githubusercontent.com/RozyckiK/ProjektBalancer/main/deployment.yaml"
+    local_file: "/tmp/deployment.yaml"
+
+  tasks:
+    - name: Zabij wszystko w projekt-balancer (pody, deploymenty, svc, configmapy)
+      shell: |
+        kubectl delete all --all -n projekt-balancer || true
+        kubectl delete configmap --all -n projekt-balancer || true
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Poczekaj 10 sekund na pełne usunięcie
+      pause:
+        seconds: 10
+
+    - name: Pobierz manifest z GitHuba (raw)
+      get_url:
+        url: "{{ raw_url }}"
+        dest: "{{ local_file }}"
+
+    - name: Deploy manifest do K8s
+      shell: kubectl apply -f "{{ local_file }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: deploy_out
+
+    - name: Wyświetl wynik kubectl apply
+      debug:
+        var: deploy_out.stdout_lines
+
+    - name: Wyświetl stan wszystkich podów
+      shell: kubectl get pods -n projekt-balancer -o wide
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: pods_out
+
+    - name: Podsumowanie podów
+      debug:
+        var: pods_out.stdout_lines
