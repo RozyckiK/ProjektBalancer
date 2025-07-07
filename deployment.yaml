@@ -584,7 +584,7 @@ spec:
           - "--pattern=ramp"
           - "--min-rps=1"
           - "--max-rps=300"
-          - "--duration=600"      # cały test 600s (10 min)
+          - "--duration=600"      # cały test 300s (5 min)
           - "--step-time=30"      # co 30s ramp-up
           - "--bootstrap=kafka-proxy:19092"
           - "--topic=test-topic"
@@ -1040,7 +1040,7 @@ metadata:
   name: kafka-proxy
   namespace: projekt-balancer
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: kafka-proxy
@@ -1058,7 +1058,7 @@ spec:
           - |
             # przy starcie kopiujemy naszą konfigurację i uruchamiamy NGINX w trybie demonless
             cp /etc/nginx-custom/nginx.conf /etc/nginx/nginx.conf && \
-            nginx -g 'daemon off;' 
+            nginx -g 'daemon off;'
         ports:
           - containerPort: 19092
         volumeMounts:
@@ -1075,8 +1075,8 @@ spec:
         - name: nginx-conf
           configMap:
             # --- Uncomment needed load balancing type ---
-            name: kafka-proxy-config-rr
-            #name: kafka-proxy-config-least
+            #name: kafka-proxy-config-rr
+            name: kafka-proxy-config-least
             #name: kafka-proxy-config-weight
 ---
 apiVersion: v1
@@ -1093,4 +1093,3 @@ spec:
       protocol: TCP
       port: 19092
       targetPort: 19092
-
