@@ -8,3 +8,5 @@ terraform/.terraform
 terraform/terraform.tfstate.backup
 *.docx
 *.tmp
+*.pdf
+terraform/secrets.pkrvars.hcl
