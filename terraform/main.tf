@@ -36,6 +36,8 @@ resource "proxmox_vm_qemu" "vm-instance" {
     agent = 1
     additional_wait     = 60
 
+    sshkeys = $(cat ~/.ssh/id_ed25519.pub)
+
     disk {
         slot            = "scsi0"
         size            = "32G"                                             #Do wypełnienia i opisania
@@ -54,12 +56,12 @@ resource "proxmox_vm_qemu" "vm-instance" {
 resource "local_file" "ansible_inventory" {
   content = <<EOT
 [masters]
-${proxmox_vm_qemu.vm-instance[0].name} ansible_host=${proxmox_vm_qemu.vm-instance[0].default_ipv4_address} ansible_user=root ansible_ssh_private_key_file=~/.ssh/id_ed25519 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+${proxmox_vm_qemu.vm-instance[0].name} ansible_host=${proxmox_vm_qemu.vm-instance[0].default_ipv4_address} ansible_user=ubuntu ansible_ssh_pass=$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 [workers]
 %{ for idx, vm in proxmox_vm_qemu.vm-instance }
 %{ if idx > 0 }
-${vm.name} ansible_host=${vm.default_ipv4_address} ansible_user=root ansible_ssh_private_key_file=~/.ssh/id_ed25519 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+${vm.name} ansible_host=${vm.default_ipv4_address} ansible_user=ubuntu ansible_ssh_pass=$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 %{ endif }
 %{ endfor }
 EOT

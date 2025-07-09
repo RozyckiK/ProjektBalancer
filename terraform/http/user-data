@@ -41,6 +41,7 @@ autoinstall:
     - python3-pip
     - jq
     - cloud-init
+    - sshpass
   storage:
     layout:
       name: direct
