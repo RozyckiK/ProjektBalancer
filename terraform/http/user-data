@@ -7,7 +7,7 @@ autoinstall:
   identity:
     hostname: ubuntu-server
     username: ubuntu
-    password: "$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1"
+    password: "ubuntu"
   ssh:
     install-server: true
     allow-pw: true
@@ -41,7 +41,6 @@ autoinstall:
     - python3-pip
     - jq
     - cloud-init
-    - sshpass
   storage:
     layout:
       name: direct
