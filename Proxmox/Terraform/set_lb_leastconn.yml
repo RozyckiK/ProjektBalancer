@@ -1,0 +1,16 @@
+---
+- name: Przełącz na Least Connections Load Balancer
+  hosts: masters
+  become: yes
+  tasks:
+    - name: Usuń istniejący deployment load balancera (jeśli istnieje)
+      shell: |
+        kubectl delete deployment projektbalancer || true
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+    - name: Załaduj deployment least-connections
+      shell: |
+        kubectl apply -f https://raw.githubusercontent.com/RozyckiK/ProjektBalancer/main/deployment.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml

@@ -1,0 +1,36 @@
+---
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Install k3s master
+      shell: curl -sfL https://get.k3s.io | sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Get k3s node-token
+      slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token
+
+    - name: Set fact with node token
+      set_fact:
+        k3s_token: "{{ node_token['content'] | b64decode | trim }}"
+      run_once: true
+
+- hosts: workers
+  become: yes
+  tasks:
+    - name: Install k3s agent
+      block:
+        - name: Install k3s agent
+          shell: |
+            export K3S_URL=https://{{ hostvars[groups['masters'][0]]['ansible_host'] }}:6443
+            export K3S_TOKEN={{ hostvars[groups['masters'][0]]['k3s_token'] }}
+            curl -sfL https://get.k3s.io | sh -
+          args:
+            creates: /usr/local/bin/k3s-agent
+      rescue:
+        - name: Check if agent installed anyway
+          shell: systemctl is-active --quiet k3s-agent
+          register: k3s_agent_running
+          failed_when: k3s_agent_running.rc != 0
