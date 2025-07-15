@@ -839,7 +839,7 @@ spec:
         args:
           - "--pattern=ramp"
           - "--min-rps=1"
-          - "--max-rps=800"
+          - "--max-rps=600"
           - "--duration=600"      # cały test 300s (5 min)
           - "--step-time=60"      # co 30s ramp-up
           - "--bootstrap=kafka-proxy:19092"
