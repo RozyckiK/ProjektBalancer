@@ -1,4 +1,4 @@
-proxmox_url      = "/api2/json" #Tutaj wkleić proxmox_url z notatnika, wkleić przed /api2/json" ale za "
+proxmox_url      = "https://<PROXMOX_URL z notatnika>/api2/json" #Tutaj wkleić proxmox_url z notatnika, wkleić przed /api2/json" ale za https://
 proxmox_username = ""           #Tutaj wkleić proxmox_username z notatnika, wkleić pomiędzy cudzysłowia
 
 vm_id        = "9001"

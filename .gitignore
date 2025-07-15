@@ -1,6 +1,5 @@
 .vagrant/
 join.sh
-terraform.tfvars
 terraform.tfstate
 .terraform.lock.hcl
 packer/secret.pkrvars.hcl
@@ -9,4 +8,3 @@ terraform/terraform.tfstate.backup
 *.docx
 *.tmp
 *.pdf
-terraform/secrets.pkrvars.hcl
