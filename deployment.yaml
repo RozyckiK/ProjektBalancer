@@ -631,7 +631,7 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: bitnami/kafka:3.4.0
+        image: bitnamilegacy/kafka:3.4.0-debian-11-r9
         ports:
           - containerPort: 9092
         env:
@@ -699,7 +699,7 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: bitnami/kafka:3.4.0
+        image: bitnamilegacy/kafka:3.4.0-debian-11-r9
         ports:
           - containerPort: 9092
         env:
@@ -767,7 +767,7 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: bitnami/kafka:3.4.0
+        image: bitnamilegacy/kafka:3.4.0-debian-11-r9
         ports:
           - containerPort: 9092
         env:
@@ -1145,7 +1145,7 @@ spec:
     spec:
       containers:
         - name: zookeeper
-          image: bitnami/zookeeper:latest
+          image: bitnamilegacy/zookeeper:3.9.3-debian-12-r22
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
               value: "yes"
