@@ -1332,8 +1332,8 @@ spec:
           configMap:
             # --- Uncomment needed load balancing type ---
             #name: kafka-proxy-config-rr
-            #name: kafka-proxy-config-least
-            name: kafka-proxy-config-weight
+            name: kafka-proxy-config-least
+            #name: kafka-proxy-config-weight
 ---
 apiVersion: v1
 kind: Service
