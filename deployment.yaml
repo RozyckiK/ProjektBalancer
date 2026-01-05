@@ -678,142 +678,6 @@ spec:
 
 
 
-#-----------------------------------------------------------------------------------------------
-#-----------------------------------------|   Kafka-2   |---------------------------------------
-#-----------------------------------------------------------------------------------------------
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kafka-2
-  namespace: projekt-balancer
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: kafka-2
-  template:
-    metadata:
-      labels:
-        app: kafka-2
-    spec:
-      containers:
-      - name: kafka
-        image: bitnamilegacy/kafka:3.4.0-debian-11-r9
-        ports:
-          - containerPort: 9092
-        env:
-          - name: KAFKA_BROKER_ID
-            value: "2"
-          - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-            value: "zookeeper:2181"
-          - name: KAFKA_CFG_LISTENERS
-            value: "PLAINTEXT://:9092"
-          - name: KAFKA_CFG_ADVERTISED_LISTENERS
-            value: "PLAINTEXT://kafka-2:9092"
-          - name: ALLOW_PLAINTEXT_LISTENER
-            value: "yes"
-          - name: KAFKA_ENABLE_KRAFT
-            value: "false"
-          - name: KAFKA_CFG_LOG_RETENTION_MS
-            value: "60000"       # 60s w ms
-          - name: KAFKA_CFG_LOG_RETENTION_BYTES
-            value: "-1"            # brak limitu po rozmiarze
-          - name: KAFKA_CFG_LOG_SEGMENT_BYTES
-            value: "1073741824"    # 1 GiB
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "400m"
-          limits:
-            memory: "1024Mi"
-            cpu: "800m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka-2
-  namespace: projekt-balancer
-spec:
-  selector:
-    app: kafka-2
-  ports:
-    - port: 9092
-      targetPort: 9092
----
-
-
-
-
-
-#-----------------------------------------------------------------------------------------------
-#-----------------------------------------|   Kafka-3   |---------------------------------------
-#-----------------------------------------------------------------------------------------------
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kafka-3
-  namespace: projekt-balancer
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: kafka-3
-  template:
-    metadata:
-      labels:
-        app: kafka-3
-    spec:
-      containers:
-      - name: kafka
-        image: bitnamilegacy/kafka:3.4.0-debian-11-r9
-        ports:
-          - containerPort: 9092
-        env:
-          - name: KAFKA_BROKER_ID
-            value: "3"
-          - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-            value: "zookeeper:2181"
-          - name: KAFKA_CFG_LISTENERS
-            value: "PLAINTEXT://:9092"
-          - name: KAFKA_CFG_ADVERTISED_LISTENERS
-            value: "PLAINTEXT://kafka-3:9092"
-          - name: ALLOW_PLAINTEXT_LISTENER
-            value: "yes"
-          - name: KAFKA_ENABLE_KRAFT
-            value: "false"
-          - name: KAFKA_CFG_LOG_RETENTION_MS
-            value: "60000"       # 60s w ms
-          - name: KAFKA_CFG_LOG_RETENTION_BYTES
-            value: "-1"            # brak limitu po rozmiarze
-          - name: KAFKA_CFG_LOG_SEGMENT_BYTES
-            value: "1073741824"    # 1 GiB
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "400m"
-          limits:
-            memory: "1024Mi"
-            cpu: "800m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kafka-3
-  namespace: projekt-balancer
-spec:
-  selector:
-    app: kafka-3
-  ports:
-    - port: 9092
-      targetPort: 9092
----
-
-
-
-
-
 #--------------------------------------------------------------------------------------------------------
 #-----------------------------------------|   load generator   |-----------------------------------------
 #--------------------------------------------------------------------------------------------------------
@@ -1199,8 +1063,6 @@ data:
       upstream kafka_cluster {
         # Domyślnie NGINX używa Round Robin, więc nie musimy dodawać żadnych dyrektyw.
         server kafka-1:9092;
-        server kafka-2:9092;
-        server kafka-3:9092;
       }
 
       server {
@@ -1236,8 +1098,6 @@ data:
       upstream kafka_cluster {
         least_conn;              # dyrektywa włącza „Least Connections”
         server kafka-1:9092;
-        server kafka-2:9092;
-        server kafka-3:9092;
       }
 
       server {
@@ -1272,8 +1132,6 @@ data:
       upstream kafka_cluster {
         # Przykładowe wagi; można je dostosować w zależności od zasobów brokerów
         server kafka-1:9092 weight=1;
-        server kafka-2:9092 weight=2;
-        server kafka-3:9092 weight=1;
       }
 
       server {
