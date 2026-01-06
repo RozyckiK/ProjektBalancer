@@ -838,9 +838,9 @@ spec:
         image: rozyckik/load-generator:latest
         args:
           - "--pattern=ramp"
-          - "--min-rps=100"
+          - "--min-rps=10"
           - "--max-rps=700"
-          - "--duration=1800"      # cały test 300s (5 min)
+          - "--duration=3600"      # cały test 300s (5 min)
           - "--step-time=100"      # co 30s ramp-up
           - "--bootstrap=kafka-proxy:19092"
           - "--topic=test-topic"
