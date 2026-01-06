@@ -1191,7 +1191,7 @@ metadata:
 data:
   nginx.conf: |
     # uwaga: to jest minimalna konfiguracja NGINX w trybie TCP stream
-    worker_processes  1;
+    worker_processes  auto;
     events {
       worker_connections  1024;
     }
@@ -1228,7 +1228,7 @@ metadata:
   namespace: projekt-balancer
 data:
   nginx.conf: |
-    worker_processes  1;
+    worker_processes  auto;
     events {
       worker_connections  1024;
     }
@@ -1264,7 +1264,7 @@ metadata:
   namespace: projekt-balancer
 data:
   nginx.conf: |
-    worker_processes  1;
+    worker_processes  auto;
     events {
       worker_connections  1024;
     }
