@@ -1272,7 +1272,7 @@ data:
       upstream kafka_cluster {
         # Przykładowe wagi; można je dostosować w zależności od zasobów brokerów
         server kafka-1:9092 weight=1;
-        server kafka-2:9092 weight=2;
+        server kafka-2:9092 weight=1;
         server kafka-3:9092 weight=1;
       }
 
@@ -1331,9 +1331,9 @@ spec:
         - name: nginx-conf
           configMap:
             # --- Uncomment needed load balancing type ---
-            name: kafka-proxy-config-rr
+            #name: kafka-proxy-config-rr
             #name: kafka-proxy-config-least
-            #name: kafka-proxy-config-weight
+            name: kafka-proxy-config-weight
 ---
 apiVersion: v1
 kind: Service
