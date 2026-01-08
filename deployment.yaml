@@ -1261,8 +1261,8 @@ spec:
         - name: nginx-conf
           configMap:
             # --- Uncomment needed load balancing type ---
-            #name: kafka-proxy-config-rr
-            name: kafka-proxy-config-least
+            name: kafka-proxy-config-rr
+            #name: kafka-proxy-config-least
             #name: kafka-proxy-config-weight
 ---
 apiVersion: v1
