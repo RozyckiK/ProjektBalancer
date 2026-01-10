@@ -1,24 +1,9 @@
-- hosts: masters
+- name: Deploy ProjektBalancer
+  hosts: masters
   become: yes
   tasks:
-    - name: Install k3s master
-      shell: curl -sfL https://get.k3s.io | sh -
-
-    - name: Get k3s node-token
-      slurp:
-        src: /var/lib/rancher/k3s/server/node-token
-      register: node_token
-
-    - name: Set fact with node token
-      set_fact:
-        k3s_token: "{{ node_token['content'] | b64decode | trim }}"
-      run_once: true
-
-- hosts: workers
-  become: yes
-  tasks:
-    - name: Install k3s agent
+    - name: Apply ProjektBalancer deployment from GitHub
       shell: |
-        export K3S_URL=https://{{ hostvars[groups['masters'][0]]['ansible_host'] }}:6443
-        export K3S_TOKEN={{ hostvars[groups['masters'][0]]['k3s_token'] }}
-        curl -sfL https://get.k3s.io | sh -
+        kubectl apply -f https://raw.githubusercontent.com/RozyckiK/ProjektBalancer/main/deployment.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
