@@ -1,28 +1,26 @@
-resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  for_each = var.vms
+resource "local_file" "ansible_inventory" {
+  content = <<EOL
+[masters]
+${local.vms_info[local.vms_keys[0]].name} ansible_host=${local.vms_info[local.vms_keys[0]].ip} ansible_user=ubuntu
 
-  name      = each.key
-  node_name = var.target_node
+[workers]
+%{ for idx, k in local.vms_keys }
+%{ if idx > 0 }
+${local.vms_info[k].name} ansible_host=${local.vms_info[k].ip} ansible_user=ubuntu
+%{ endif }
+%{ endfor }
+EOL
+  filename = "${path.module}/hosts"
+}
 
-  clone {
-    vm_id = 9001
-    full  = true
-  }
+resource "null_resource" "ansible_provision" {
+  depends_on = [proxmox_virtual_environment_vm.ubuntu_vm, local_file.ansible_inventory]
 
-  cpu    { cores = each.value.cores }
-  memory { dedicated = each.value.memory }
-
-  initialization {
-    ip_config {
-      ipv4 {
-        address = each.value.ip_address
-        gateway = var.gateway
-      }
-    }
-    user_account {
-      username = "ubuntu"
-      keys     = [var.ssh_public_keys]
-      password = var.vm_password
-    }
+  provisioner "local-exec" {
+    command = <<EOT
+      sleep 30
+      ansible-playbook -i ${path.module}/hosts playbooks/k3s-config.yml
+      ansible-playbook -i ${path.module}/hosts playbooks/deployment.yml
+    EOT
   }
 }
