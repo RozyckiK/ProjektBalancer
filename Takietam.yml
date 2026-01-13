@@ -1,9 +1,0 @@
-- name: Deploy ProjektBalancer
-  hosts: masters
-  become: yes
-  tasks:
-    - name: Apply ProjektBalancer deployment from GitHub
-      shell: |
-        kubectl apply -f https://raw.githubusercontent.com/RozyckiK/ProjektBalancer/main/deployment.yaml
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
